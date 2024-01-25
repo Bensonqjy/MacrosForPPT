@@ -1,0 +1,72 @@
+Option Explicit
+Sub ExportSlidesAsPresentations()
+  Dim oSld As Slide           ' Reference to a slide object
+  Dim tPath As String         ' Path of the active presentation
+  Dim tFileName As String     ' Filename for the output presentation
+  Dim arrSR() As Variant      ' Array of slides to be deleted
+  Dim lIdx As Long            ' Slide index counter
+  Dim lCount As Long          ' Slides array dimension
+  Dim lSldIdx As Long         ' Current slide index
+  Dim lVisibleSlides As Long  ' Total number of visible slides to export
+ 
+  On Error GoTo errorhandler
+ 
+  For Each oSld In ActivePresentation.Slides
+    If Not oSld.SlideShowTransition.Hidden Then lVisibleSlides = lVisibleSlides + 1
+  Next
+ 
+  If MsgBox("Depending on the number of visible slides to export and the size " & _
+    "of your presentation, this might take some time." & vbCrLf & vbCrLf & "Continue?", _
+    vbYesNo + vbQuestion, _
+    "Export " & lVisibleSlides & " Visible Slides to Presentations") = vbNo Then Exit Sub
+ 
+  With ActivePresentation
+    tPath = ActivePresentation.Path
+ 
+    ' Export each slide as a presentation by deleting all other slides
+    ' and the restore the slides using ctrl+z
+    For Each oSld In .Slides
+      If Not oSld.SlideShowTransition.Hidden Then
+        lSldIdx = oSld.SlideIndex
+        Erase arrSR
+        lCount = 0
+ 
+        ' Get an array of all slides in the presentation except this one
+        For lIdx = 1 To .Slides.Count
+          If Not oSld Is .Slides(lIdx) Then
+            ReDim Preserve arrSR(lCount)
+            arrSR(lCount) = lIdx
+            lCount = lCount + 1
+          End If
+        Next
+ 
+        ' Select and delete all slides except this one
+        If ActiveWindow.ViewType = ppViewNormal Then ActiveWindow.Panes(1).Activate
+        .Slides.Range(arrSR).Select
+        ActiveWindow.Selection.Delete
+        DoEvents
+ 
+        ' Build a unique filename and save a coy of the now single-slide presentation
+        tFileName = Left(.Name, InStrRev(.Name, ".") - 1) & "_" & Left(oSld.Shapes(1).TextFrame.TextRange.Text, 25) & "_" & " slide " & lSldIdx & ".pptx"
+        .SaveCopyAs tPath & "\" & tFileName, ppSaveAsOpenXMLPresentation
+ 
+        ' Undo the slide deletion to recover all slides
+        CommandBars.ExecuteMso "Undo"
+        DoEvents
+      End If
+    Next
+ 
+  End With
+ 
+  ' Give feedback to the user
+  MsgBox lVisibleSlides & " slide(s) exported to " & tPath, _
+         vbQuestion + vbOKOnly, "BrightCarbon - Export Complete"
+ 
+  On Error GoTo 0
+ 
+  Exit Sub
+ 
+errorhandler:
+  Debug.Print Err, Err.Description
+  Resume Next
+End Sub
