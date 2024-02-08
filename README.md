@@ -1,5 +1,19 @@
 # MacrosForPPT
-This repo consist of Macros for 
-1.splitting of powerpoint slides to individual powerpoint presentation
-2.Merging of powerpoint slides to the file open with the same format type.
-3.C# console application to run the VBA Macros (TBC)
+
+This repository contains macros for PowerPoint designed to streamline your workflow.
+
+## Features:
+
+1. **Splitting Slides:**
+   - Split PowerPoint presentations into individual slide files.
+
+2. **Merging Slides:**
+   - Merge PowerPoint slides with the same format type into one file.
+
+## Usage:
+
+- Clone the repository and follow the instructions provided to use the macros.
+
+## Contributions:
+
+Contributions are welcome! Please feel free to open an issue or submit a pull request.
